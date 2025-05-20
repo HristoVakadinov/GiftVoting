@@ -1,0 +1,17 @@
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\bin\Debug\net8.0\Gifts.Services.deps.json
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\bin\Debug\net8.0\Gifts.Services.dll
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\bin\Debug\net8.0\Gifts.Services.pdb
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\bin\Debug\net8.0\Gifts.Models.dll
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\bin\Debug\net8.0\Gifts.Repository.dll
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\bin\Debug\net8.0\Gifts.Repository.pdb
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\bin\Debug\net8.0\Gifts.Models.pdb
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\obj\Debug\net8.0\Gifts.Services.csproj.AssemblyReference.cache
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\obj\Debug\net8.0\Gifts.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\obj\Debug\net8.0\Gifts.Services.AssemblyInfoInputs.cache
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\obj\Debug\net8.0\Gifts.Services.AssemblyInfo.cs
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\obj\Debug\net8.0\Gifts.Services.csproj.CoreCompileInputs.cache
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\obj\Debug\net8.0\Gifts.Se.1949E745.Up2Date
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\obj\Debug\net8.0\Gifts.Services.dll
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\obj\Debug\net8.0\refint\Gifts.Services.dll
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\obj\Debug\net8.0\Gifts.Services.pdb
+C:\Users\Intern\source\repos\Gifts\Gifts.Services\obj\Debug\net8.0\ref\Gifts.Services.dll

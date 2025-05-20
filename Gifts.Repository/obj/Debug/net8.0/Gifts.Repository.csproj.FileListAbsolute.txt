@@ -1,0 +1,15 @@
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\bin\Debug\net8.0\Gifts.Repository.deps.json
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\bin\Debug\net8.0\Gifts.Repository.dll
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\bin\Debug\net8.0\Gifts.Repository.pdb
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\bin\Debug\net8.0\Gifts.Models.dll
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\bin\Debug\net8.0\Gifts.Models.pdb
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\obj\Debug\net8.0\Gifts.Repository.csproj.AssemblyReference.cache
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\obj\Debug\net8.0\Gifts.Repository.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\obj\Debug\net8.0\Gifts.Repository.AssemblyInfoInputs.cache
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\obj\Debug\net8.0\Gifts.Repository.AssemblyInfo.cs
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\obj\Debug\net8.0\Gifts.Repository.csproj.CoreCompileInputs.cache
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\obj\Debug\net8.0\Gifts.Re.BFA07679.Up2Date
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\obj\Debug\net8.0\Gifts.Repository.dll
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\obj\Debug\net8.0\refint\Gifts.Repository.dll
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\obj\Debug\net8.0\Gifts.Repository.pdb
+C:\Users\Intern\source\repos\Gifts\Gifts.Repository\obj\Debug\net8.0\ref\Gifts.Repository.dll
