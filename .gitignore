@@ -1,0 +1,12 @@
+# .Net build folders
+**/bin/
+**/obj/
+
+# VS Code settings
+.vscode/
+
+#package folders
+**/packages/
+
+#appsettings.json
+**/appsettings.json
