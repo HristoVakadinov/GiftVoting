@@ -8,8 +8,8 @@ namespace Gifts.Services.Interfaces.Gift
 {
     public interface IGiftService
     {
-        Task<GiftDto> GetGiftByIdAsync(int giftId);
-        Task<IEnumerable<GiftDto>> GetAllGiftsAsync();
+        Task<GetGiftResponse> GetGiftByIdAsync(int giftId);
+        Task<GetAllGiftsResponse> GetAllGiftsAsync();
         // Task<GiftDto> CreateGiftAsync(GiftDto gift);
         // Task<GiftDto> UpdateGiftAsync(GiftDto gift);
         // Task<bool> DeleteGiftAsync(int giftId);

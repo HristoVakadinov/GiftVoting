@@ -4,8 +4,8 @@ namespace Gifts.Services.Interfaces.Vote
 {
     public interface IVoteService
     {
-        Task<VoteDto> CreateVoteAsync(CreateVoteRequest request);
-        Task<IEnumerable<VoteDto>> GetVotesByVotingSessionIdAsync(int votingSessionId);
-        Task<bool> UserHasVotedAsync(int votingSessionId, int employeeId);
+        Task<CreateVoteResponse> CreateVoteAsync(CreateVoteRequest request);
+        Task<GetAllVotesResponse> GetVotesByVotingSessionIdAsync(int votingSessionId);
+        Task<HasUserVotedResponse> UserHasVotedAsync(HasUserVotedRequest request);
     }
 }

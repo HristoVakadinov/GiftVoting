@@ -8,11 +8,11 @@ namespace Gifts.Services.Interfaces.Employee
 {
     public interface IEmployeeService
     {
-        Task<EmployeeDto> GetEmployeeByIdAsync(int employeeId);
-        Task<IEnumerable<EmployeeDto>> GetAllEmployeesAsync();
+        Task<GetEmployeeResponse> GetEmployeeByIdAsync(int employeeId);
+        Task<GetAllEmployeesResponse> GetAllEmployeesAsync();
         // Task<EmployeeDto> CreateEmployeeAsync(EmployeeDto employee);
-         Task<bool> UpdateFullNameAsync(int employeeId, string newFullName);
-        Task<bool> UpdatePasswordAsync(int employeeId, string newPassword);
-        Task<IEnumerable<EmployeeDto>> GetEmployeesWithUpcomingBirthdays(int daysAhead);
+         Task<UpdateEmployeeResponse> UpdateFullNameAsync(UpdateFullNameRequest request);
+        Task<UpdateEmployeeResponse> UpdatePasswordAsync(UpdatePasswordRequest request);
+        Task<GetAllEmployeesResponse> GetEmployeesWithUpcomingBirthdays(int daysAhead);
     }
 }

@@ -8,10 +8,10 @@ namespace Gifts.Services.Interfaces.VotingSession
 {
     public interface IVotingSessionService
     {
-        Task<VotingSessionDto> GetVotingSessionByIdAsync(int votingSessionId);
-        Task<IEnumerable<VotingSessionDto>> GetAllActiveVotingSessionsAsync();
-        Task<VotingSessionDto> CreateVotingSessionAsync(CreateVotingSessionRequest request);
-        Task<bool> EndVotingSessionAsync(int votingSessionId, int requestorId );
-        Task<VotingSessionDto> GetActiveSessionForEmployeeAsync(int employeeId);
+        Task<GetVotingSessionsResponse> GetVotingSessionByIdAsync(int sessionId);
+        Task<GetActiveVotingSessionsResponse> GetAllActiveVotingSessionsAsync();
+        Task<CreateVotingSessionResponse> CreateVotingSessionAsync(CreateVotingSessionRequest request);
+        Task<EndVotingSessionResponse> EndVotingSessionAsync(EndVotingSessionRequest request);
+        Task<GetVotingSessionsResponse> GetActiveSessionForEmployeeAsync(int employeeId);
     }
 }
