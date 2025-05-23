@@ -13,32 +13,36 @@ namespace Gifts.Services.Implementations.Gift
             _giftRepository = giftRepository;
         }
 
-        private GiftDto MapToDto(Models.Gift gift)
+        private GiftInfo MapToGiftInfo(Models.Gift gift)
         {
-            return new GiftDto
+            return new GiftInfo
             {
                 GiftId = gift.GiftId,
                 Name = gift.Name,
                 Description = gift.Description,
-                Price = gift.Price,
+                Price = gift.Price
             };
         }
 
-        public async Task<IEnumerable<GiftDto>> GetAllGiftsAsync()
+        public async Task<GetAllGiftsResponse> GetAllGiftsAsync()
         {
             var gifts = await _giftRepository.RetrieveCollectionAsync(new GiftFilter()).ToListAsync();
-            return gifts.Select(MapToDto);
+            var giftsResponse = new GetAllGiftsResponse
+            {
+                Gifts = gifts.Select(MapToGiftInfo).ToList(),
+                TotalCount = gifts.Count
+            };
+            return giftsResponse;
         }
 
-        public async Task<GiftDto> GetGiftByIdAsync(int giftId)
+        public async Task<GetGiftResponse> GetGiftByIdAsync(int giftId)
         {
             var gift = await _giftRepository.RetrieveAsync(giftId);
             if (gift == null)
             {
                 throw new Exception("Gift not found");
             }
-            return MapToDto(gift);
+            return (GetGiftResponse)MapToGiftInfo(gift);
         }
-        
     }
 }

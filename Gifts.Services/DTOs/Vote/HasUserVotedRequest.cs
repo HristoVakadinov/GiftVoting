@@ -7,6 +7,7 @@ namespace Gifts.Services.DTOs.Vote
 {
     public class HasUserVotedRequest
     {
-        
+        public int VotingSessionId { get; set; }
+        public int EmployeeId { get; set; }
     }
 }

@@ -7,9 +7,9 @@ namespace Gifts.Services.DTOs.Gift
 {
     public class GiftDto
     {
-        public int GiftId { get; set; }
-        public string Name { get; set; }
-        public string? Description { get; set; }
-        public decimal Price { get; set; }
+        // public int GiftId { get; set; }
+        // public string Name { get; set; }
+        // public string? Description { get; set; }
+        // public decimal Price { get; set; }
     }
 }

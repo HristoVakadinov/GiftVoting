@@ -22,12 +22,11 @@ namespace Gifts.Services.Implementations.VotingSession
             _employeeRepository = employeeRepository;
         }
 
-        private async Task<VotingSessionDto> MapToDtoAsync(Models.VotingSession votingSession)
+        private async Task<VotingSessionInfo> MapToVotingSessionInfoAsync(Models.VotingSession votingSession)
         {
             var birthdayPerson = await _employeeRepository.RetrieveAsync(votingSession.BirthdayPersonId);
             var createdBy = await _employeeRepository.RetrieveAsync(votingSession.CreatedById);
-
-            return new VotingSessionDto
+            return new VotingSessionInfo
             {
                 VotingSessionId = votingSession.VotingSessionId,
                 BirthdayPersonId = votingSession.BirthdayPersonId,
@@ -41,115 +40,167 @@ namespace Gifts.Services.Implementations.VotingSession
             };
         }
 
-        public async Task<VotingSessionDto> CreateVotingSessionAsync(CreateVotingSessionRequest request)
+        public async Task<CreateVotingSessionResponse> CreateVotingSessionAsync(CreateVotingSessionRequest request)
         {
             if (request.CreatedById == request.BirthdayPersonId)
             {
-                throw new ValidationException("You cannot create a voting session for yourself");
+                return new CreateVotingSessionResponse()
+                {
+                    Success = false,
+                    Message = "You cannot create a voting session for yourself"
+                };
             }
 
-            var filter = new VotingSessionFilter
+            var activeSessionFilter = new VotingSessionFilter
             {
                 BirthdayPersonId = new SqlInt32(request.BirthdayPersonId),
-                IsActive = new SqlBoolean(true)
+                IsActive = SqlBoolean.True
             };
 
-            var existingSession = await _votingSessionRepository.RetrieveCollectionAsync(filter).AnyAsync();
-            if (existingSession)
+            var hasActiveSession = await _votingSessionRepository
+                .RetrieveCollectionAsync(activeSessionFilter)
+                .AnyAsync();
+
+            if (hasActiveSession)
             {
-                throw new ValidationException("A voting session already exists for this birthday person");
+                return new CreateVotingSessionResponse()
+                {
+                    Success = false,
+                    Message = "There is already an active voting session for this person"
+                };
             }
 
-            var currYear = DateTime.Now.Year;
+            var currentYear = DateTime.Now.Year;
             var yearSessionFilter = new VotingSessionFilter
             {
-                BirthdayPersonId = new SqlInt32(request.BirthdayPersonId),
+                BirthdayPersonId = new SqlInt32(request.BirthdayPersonId)
             };
 
-            var sessionYear = await _votingSessionRepository.RetrieveCollectionAsync(yearSessionFilter).ToListAsync();
-            if (sessionYear.Any(x => x.BirthYear == currYear))
+            var yearSessions = await _votingSessionRepository
+                .RetrieveCollectionAsync(yearSessionFilter)
+                .ToListAsync();
+
+            if (yearSessions.Any(s => s.BirthYear == currentYear))
             {
-                throw new ValidationException("A voting session already exists for this birthday person this year");
+                return new CreateVotingSessionResponse()
+                {
+                    Success = false,
+                    Message = "There is already a voting session for this person this year"
+                };
             }
 
-            var votingSession = new Models.VotingSession
+            var session = new Models.VotingSession
             {
                 BirthdayPersonId = request.BirthdayPersonId,
                 CreatedById = request.CreatedById,
-                BirthYear = currYear,
                 StartDate = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                BirthYear = currentYear
             };
 
-            var sessionId = await _votingSessionRepository.CreateAsync(votingSession);
-            return await GetVotingSessionByIdAsync(sessionId);            
+            int sessionId = await _votingSessionRepository.CreateAsync(session);
+
+            session.VotingSessionId = sessionId;
+            var sessionInfo = await MapToVotingSessionInfoAsync(session);
+            return new CreateVotingSessionResponse
+            {
+                VotingSessionId = sessionInfo.VotingSessionId,
+                BirthdayPersonId = sessionInfo.BirthdayPersonId,
+                BirthdayPersonName = sessionInfo.BirthdayPersonName,
+                CreatedById = sessionInfo.CreatedById,
+                CreatedByFullName = sessionInfo.CreatedByFullName,
+                StartDate = sessionInfo.StartDate,
+                EndDate = sessionInfo.EndDate,
+                IsActive = sessionInfo.IsActive,
+                BirthYear = sessionInfo.BirthYear,
+                Success = true
+            };
         }
 
-        public async Task<bool> EndVotingSessionAsync(int votingSessionId, int requestorId)
+        public async Task<EndVotingSessionResponse> EndVotingSessionAsync(EndVotingSessionRequest request)
         {
-            var session = await _votingSessionRepository.RetrieveAsync(votingSessionId);
-            if (session == null)
+            var session = await _votingSessionRepository.RetrieveAsync(request.VotingSessionId);
+
+            if (session.CreatedById != request.EndedById)
             {
-                throw new ValidationException("Voting session not found");
+                return new EndVotingSessionResponse()
+                {
+                    Success = false,
+                    Message = "Only the creator can end the voting session"
+                };
             }
-            
-            if(session.CreatedById != requestorId)
-            {
-                throw new ValidationException("You are not authorized to end this voting session! Only the creator can end the session.");
-            }
-            var updatedSession = new VotingSessionUpdate
+
+            var update = new VotingSessionUpdate
             {
                 IsActive = SqlBoolean.False,
                 EndDate = new SqlDateTime(DateTime.Now)
             };
 
-            return await _votingSessionRepository.UpdateAsync(votingSessionId, updatedSession);
-        }
+            var isUpdated =  await _votingSessionRepository.UpdateAsync(request.VotingSessionId, update);
 
-        public async Task<VotingSessionDto> GetActiveSessionForEmployeeAsync(int employeeId)
-        {
-            var filter = new VotingSessionFilter
+            if (isUpdated)
             {
-                BirthdayPersonId = new SqlInt32(employeeId),
-                IsActive = SqlBoolean.True
-            };
-
-            var sessions = await _votingSessionRepository.RetrieveCollectionAsync(filter).ToListAsync();
-            if (sessions == null)
+                return new EndVotingSessionResponse()
+                {
+                    Success = true,
+                    EndedAt = (DateTime)update.EndDate
+                };
+            }
+            else
             {
-                throw new ValidationException("No active voting session found for this employee");
+                return new EndVotingSessionResponse()
+                {
+                    Success = false,
+                    Message = "Unable to end the voting session"
+                };
             }
 
-           var session = sessions.FirstOrDefault();
-           if (session == null) return null;
-           return await MapToDtoAsync(session);
         }
 
-        public async Task<IEnumerable<VotingSessionDto>> GetAllActiveVotingSessionsAsync()
+        public async Task<GetVotingSessionsResponse> GetActiveSessionForEmployeeAsync(int employeeId)
         {
-            var filter = new VotingSessionFilter
-            {
-                IsActive = new SqlBoolean(true)
-            };
-
+            var filter = new VotingSessionFilter { BirthdayPersonId = new SqlInt32(employeeId), IsActive = SqlBoolean.True };
             var sessions = await _votingSessionRepository.RetrieveCollectionAsync(filter).ToListAsync();
-            var sessionDtos = new List<VotingSessionDto>();
+            var session = sessions.FirstOrDefault();
+            if (session == null) return null;
+
+            return (GetVotingSessionsResponse)await MapToVotingSessionInfoAsync(session);
+        }
+
+        public async Task<GetActiveVotingSessionsResponse> GetAllActiveVotingSessionsAsync()
+        {
+            var filter = new VotingSessionFilter { IsActive = SqlBoolean.True };
+            var sessions = await _votingSessionRepository.RetrieveCollectionAsync(filter).ToListAsync();
+            var response = new GetActiveVotingSessionsResponse
+            {
+                ActiveSessions = new List<VotingSessionInfo>(),
+                TotalCount = sessions.Count
+            };
             foreach (var session in sessions)
             {
-                sessionDtos.Add(await MapToDtoAsync(session));
+                response.ActiveSessions.Add(await MapToVotingSessionInfoAsync(session));
             }
-            return sessionDtos;
+            return response;
         }
 
-        public async Task<VotingSessionDto> GetVotingSessionByIdAsync(int votingSessionId)
+        public async Task<GetVotingSessionsResponse> GetVotingSessionByIdAsync(int sessionId)
         {
-            var session = await _votingSessionRepository.RetrieveAsync(votingSessionId);
-            if (session == null)
+            var session = await _votingSessionRepository.RetrieveAsync(sessionId);
+            if (session == null) return null;
+            
+            var sessionInfo = await MapToVotingSessionInfoAsync(session);
+            return new GetVotingSessionsResponse
             {
-                throw new ValidationException("Voting session not found");
-            }
-
-            return await MapToDtoAsync(session);
+                VotingSessionId = sessionInfo.VotingSessionId,
+                BirthdayPersonId = sessionInfo.BirthdayPersonId,
+                BirthdayPersonName = sessionInfo.BirthdayPersonName,
+                CreatedById = sessionInfo.CreatedById,
+                CreatedByFullName = sessionInfo.CreatedByFullName,
+                StartDate = sessionInfo.StartDate,
+                EndDate = sessionInfo.EndDate,
+                IsActive = sessionInfo.IsActive,
+                BirthYear = sessionInfo.BirthYear
+            };
         }
     }
 }

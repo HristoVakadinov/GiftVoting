@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Gifts.Services.DTOs.Vote
 {
-    public class CreateVoteResponse : VoteDto
+    public class CreateVoteResponse : VoteInfo
     {
         public bool Success { get; set; }
         public string? Message { get; set; }

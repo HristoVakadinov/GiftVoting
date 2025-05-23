@@ -5,6 +5,8 @@ using Gifts.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Data.SqlTypes;
 using Gifts.Services.Helpers;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.VisualBasic;
 
 namespace Gifts.Services.Implementations.Employee
 {
@@ -17,83 +19,136 @@ namespace Gifts.Services.Implementations.Employee
             _employeeRepository = employeeRepository;
         }
 
-        private EmployeeDto MapToDto(Models.Employee employee)
+        public async Task<GetAllEmployeesResponse> GetAllEmployeesAsync()
         {
-            return new EmployeeDto
+            var employees = await _employeeRepository.RetrieveCollectionAsync(new EmployeeFilter()).ToListAsync();
+            var today = DateTime.Today;
+            var employeeInfo = employees.Select(e =>
             {
-                EmployeeId = employee.EmployeeId,
-                Username = employee.Username,
-                FullName = employee.FullName,
-                BirthDate = employee.BirthDate
+                var nextBirthday = new DateTime(
+                    today.Year,
+                    e.BirthDate.Month,
+                    e.BirthDate.Day
+                );
+                if (nextBirthday < today)
+                {
+                    nextBirthday = nextBirthday.AddYears(1);
+                }
+                
+                var daysToNextBirthday = (nextBirthday - today).Days;
+
+                return new EmployeeInfo
+                {
+                    EmployeeId = e.EmployeeId,
+                    FullName = e.FullName,
+                    DaysTillNextBirthday = daysToNextBirthday
+                };
+            }).ToList();
+
+            return new GetAllEmployeesResponse
+            {
+                Employees = employeeInfo,
+                TotalCount = employeeInfo.Count
             };
         }
 
-        public async Task<IEnumerable<EmployeeDto>> GetAllEmployeesAsync()
-        {
-            var employeeList = await _employeeRepository.RetrieveCollectionAsync(new EmployeeFilter()).ToListAsync();
-            if (employeeList == null)
-            {
-                throw new KeyNotFoundException("No employees found.");
-            }
-            return employeeList.Select(MapToDto);
-        }
-
-        public async Task<EmployeeDto> GetEmployeeByIdAsync(int employeeId)
+        public async Task<GetEmployeeResponse> GetEmployeeByIdAsync(int employeeId)
         {
             var employee = await _employeeRepository.RetrieveAsync(employeeId);
             if (employee == null)
             {
-                throw new KeyNotFoundException($"Employee with ID {employeeId} not found.");
+                throw new Exception("Employee not found");
             }
-            return MapToDto(employee);
+            return new GetEmployeeResponse
+            {
+                EmployeeId = employee.EmployeeId,
+                FullName = employee.FullName,
+                BirthDate = employee.BirthDate,
+                Username = employee.Username
+            };
         }
 
-        public async Task<bool> UpdateFullNameAsync(int employeeId, string newFullName)
+        public async Task<GetAllEmployeesResponse> GetEmployeesWithUpcomingBirthdays(int daysAhead)
         {
-            if (string.IsNullOrEmpty(newFullName))
-            {
-                throw new ValidationException("Full name cannot be empty.");
-            }
-            var update = new EmployeeUpdate
-            {
-                FullName = new SqlString(newFullName)
-            };
-            return await _employeeRepository.UpdateAsync(employeeId, update);
-        }
-        public async Task<bool> UpdatePasswordAsync(int employeeId, string newPassword)
-        {
-            if (string.IsNullOrEmpty(newPassword))
-            {
-                throw new ValidationException("Password cannot be empty.");
-            }
-            var hashedPassword = SecurityHelper.HashPassword(newPassword);
-            var update = new EmployeeUpdate
-            {
-                Password = new SqlString(hashedPassword)
-            };
-            return await _employeeRepository.UpdateAsync(employeeId, update);
-        }
+            var allEmployees = await GetAllEmployeesAsync();
 
-        public async Task<IEnumerable<EmployeeDto>> GetEmployeesWithUpcomingBirthdays(int daysAhead)
-        {
-            var employees = await _employeeRepository.RetrieveCollectionAsync(new EmployeeFilter()).ToListAsync();
-            if (employees == null)
-            {
-                throw new KeyNotFoundException("No employees found.");
-            }
             var today = DateTime.Today;
-            var upcomingBirthdays = employees.Where(e => 
-            {
-                var nextBirthday = new DateTime(today.Year, e.BirthDate.Month, e.BirthDate.Day);
-                if(nextBirthday < today)
-                {
-                    nextBirthday = nextBirthday.AddYears(1);
-                }
-                var daysUntilBirthday = (nextBirthday - today).Days;
-                return daysUntilBirthday <= daysAhead;
-            });
+            var filteredEmployees = allEmployees.Employees
+                .Where(e => e.DaysTillNextBirthday <= daysAhead)
+                .OrderBy(e => e.DaysTillNextBirthday)
+                .ToList();
 
-            return upcomingBirthdays.Select(MapToDto);
-        }        
+            return new GetAllEmployeesResponse
+            {
+                Employees = filteredEmployees,
+                TotalCount = filteredEmployees.Count()
+            };
+        }
+
+        public async Task<UpdateEmployeeResponse> UpdateFullNameAsync(UpdateFullNameRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.NewFullName))
+                {
+                    throw new ValidationException("Full name is required");
+                }
+
+                var update = new EmployeeUpdate
+                {
+                    FullName = new SqlString(request.NewFullName)
+                };
+
+                var success = await _employeeRepository.UpdateAsync(request.EmployeeId, update);
+                
+                return new UpdateEmployeeResponse
+                {
+                    Success = success,
+                    Message = success ? "Full name updated successfully" : "Failed to update full name",
+                    UpdatedAt = DateTime.Now
+                };                
+            }
+            catch (Exception ex)
+            {
+                return new UpdateEmployeeResponse
+                {
+                    Success = false,
+                    Message = ex.Message,
+                    UpdatedAt = DateTime.Now
+                };
+            }
+        }
+
+        public async Task<UpdateEmployeeResponse> UpdatePasswordAsync(UpdatePasswordRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.NewPassword))
+                    throw new ValidationException("Password cannot be empty");
+
+                var hashedPassword = SecurityHelper.HashPassword(request.NewPassword);
+                var update = new EmployeeUpdate
+                {
+                    Password = new SqlString(hashedPassword)
+                };
+
+                var success = await _employeeRepository.UpdateAsync(request.EmployeeId, update);
+
+                return new UpdateEmployeeResponse
+                {
+                    Success = success,
+                    UpdatedAt = DateTime.Now
+                };
+            }
+            catch (Exception ex)
+            {
+                return new UpdateEmployeeResponse
+                {
+                    Success = false,
+                    Message = ex.Message,
+                    UpdatedAt = DateTime.Now
+                };
+            }
+        }
     }
 }

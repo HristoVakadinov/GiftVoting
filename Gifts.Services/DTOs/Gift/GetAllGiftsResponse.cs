@@ -7,7 +7,7 @@ namespace Gifts.Services.DTOs.Gift
 {
     public class GetAllGiftsResponse
     {
-        public List<GiftDto>? Gifts { get; set; }
+        public List<GiftInfo>? Gifts { get; set; }
         public int TotalCount { get; set; }
     }
 

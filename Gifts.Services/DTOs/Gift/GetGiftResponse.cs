@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 
 namespace Gifts.Services.DTOs.Gift
 {
-    public class GetGiftResponse : GiftDto
+    public class GetGiftResponse : GiftInfo
     {
+
     }
 }

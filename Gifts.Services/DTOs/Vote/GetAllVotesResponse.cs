@@ -7,7 +7,7 @@ namespace Gifts.Services.DTOs.Vote
 {
     public class GetAllVotesResponse
     {
-        public List<VoteDto>? Votes { get; set; }
+        public List<VoteInfo>? Votes { get; set; }
         public int TotalCount { get; set; }
     }
 }

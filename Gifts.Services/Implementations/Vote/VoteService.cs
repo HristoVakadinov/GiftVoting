@@ -28,12 +28,11 @@ namespace Gifts.Services.Implementations.Vote
             _votingSessionRepository = votingSessionRepository;
         }
 
-        private async Task<VoteDto> MapToDtoAsync(Models.Vote vote)
+        private async Task<VoteInfo> MapToVoteInfoAsync(Models.Vote vote)
         {
             var voter = await _employeeRepository.RetrieveAsync(vote.VoterId);
             var gift = await _giftRepository.RetrieveAsync(vote.GiftId);
-
-            return new VoteDto
+            return new VoteInfo
             {
                 VoteId = vote.VoteId,
                 VotingSessionId = vote.VotingSessionId,
@@ -45,31 +44,58 @@ namespace Gifts.Services.Implementations.Vote
             };
         }
 
-        public async Task<VoteDto> CreateVoteAsync(CreateVoteRequest request)
+        public async Task<CreateVoteResponse> CreateVoteAsync(CreateVoteRequest request)
         {
             var session = await _votingSessionRepository.RetrieveAsync(request.VotingSessionId);
             if (session == null)
             {
-                throw new ValidationException("Voting session not found");
+                return new CreateVoteResponse()
+                {
+                    Success = false,
+                    Message = "Voting session not found"
+                };
             }
             if (!session.IsActive)
             {
-                throw new ValidationException("Voting session is not active");
+                return new CreateVoteResponse()
+                {
+                    Success = false,
+                    Message = "Voting session is not active"
+                };
             }
-            if (session.EndDate < DateTime.UtcNow)
-            {
-                throw new ValidationException("Voting session has expired");
-            }
+
             if (request.VoterId == session.BirthdayPersonId)
             {
-                throw new ValidationException("Birthday person cannot vote for themselves");
+                return new CreateVoteResponse()
+                {
+                    Success = false,
+                    Message = "Birthday person cannot vote in their own session"
+                };
             }
-            
-            var hasVoted = await UserHasVotedAsync(request.VotingSessionId, request.VoterId);
-            if (hasVoted)
+
+            var hasVoted = await UserHasVotedAsync(new HasUserVotedRequest() {
+                EmployeeId = request.VoterId, 
+                VotingSessionId = request.VotingSessionId
+                });
+            if (hasVoted.HasVoted)
             {
-                throw new ValidationException("Employee has already voted");
+                return new CreateVoteResponse()
+                {
+                    Success = false,
+                    Message = "User has already voted in this session"
+                };
             }
+
+            var gift = await _giftRepository.RetrieveAsync(request.GiftId);
+            if (gift == null)
+            {
+                return new CreateVoteResponse()
+                {
+                    Success = false,
+                    Message = "Gift not found"
+                };
+            }
+
             var vote = new Models.Vote
             {
                 VotingSessionId = request.VotingSessionId,
@@ -77,40 +103,71 @@ namespace Gifts.Services.Implementations.Vote
                 GiftId = request.GiftId,
                 VoteDate = DateTime.Now
             };
-            var voteId = await _voteRepository.CreateAsync(vote);
-            return await GetVoteByIdAsync(voteId);
-        }
 
-        private async Task<VoteDto> GetVoteByIdAsync(int voteId)
-        {
-            var vote = await _voteRepository.RetrieveAsync(voteId);
-            return await MapToDtoAsync(vote);
-        }
+            int voteId = await _voteRepository.CreateAsync(vote);
 
-        public async Task<IEnumerable<VoteDto>> GetVotesByVotingSessionIdAsync(int votingSessionId)
-        {
-            var filter = new VoteFilter
+            vote.VoteId = voteId;
+            var voteInfo = await MapToVoteInfoAsync(vote);
+            return new CreateVoteResponse
             {
-                VotingSessionId = new SqlInt32(votingSessionId)
+                VoteId = voteInfo.VoteId,
+                VotingSessionId = voteInfo.VotingSessionId,
+                VoterId = voteInfo.VoterId,
+                VoterName = voteInfo.VoterName,
+                GiftId = voteInfo.GiftId,
+                GiftName = voteInfo.GiftName,
+                VoteDate = voteInfo.VoteDate,
+                Success = true
             };
+        }
+
+        public async Task<GetAllVotesResponse> GetVotesByVotingSessionIdAsync(int votingSessionId)
+        {
+            var filter = new VoteFilter { VotingSessionId = new SqlInt32(votingSessionId) };
             var votes = await _voteRepository.RetrieveCollectionAsync(filter).ToListAsync();
 
-            var voteDtos = new List<VoteDto>();
+            var allVotes = new GetAllVotesResponse()
+            {
+                Votes = new List<VoteInfo>(),
+                TotalCount = votes.Count
+            };
             foreach (var vote in votes)
             {
-                voteDtos.Add(await MapToDtoAsync(vote));
+                allVotes.Votes.Add(await MapToVoteInfoAsync(vote));
             }
-            return voteDtos;
+            return allVotes;
         }
 
-        public async Task<bool> UserHasVotedAsync(int votingSessionId, int employeeId)
+        public async Task<HasUserVotedResponse> UserHasVotedAsync(HasUserVotedRequest request)
         {
             var filter = new VoteFilter
             {
-                VoterId = new SqlInt32(employeeId),
-                VotingSessionId = new SqlInt32(votingSessionId)
+                VoterId = new SqlInt32(request.EmployeeId),
+                VotingSessionId = new SqlInt32(request.VotingSessionId)
             };
-            return await _voteRepository.RetrieveCollectionAsync(filter).AnyAsync();
+
+            var votes = await _voteRepository.RetrieveCollectionAsync(filter).ToListAsync();
+            var vote = votes.SingleOrDefault();
+
+            if (vote == null)
+            {
+                return new HasUserVotedResponse
+                {
+                    HasVoted = false,
+                    VotedAt = null,
+                    GiftName = null
+                };
+            }
+
+            var gift = await _giftRepository.RetrieveAsync(vote.GiftId);
+
+            return new HasUserVotedResponse
+            {
+                HasVoted = true,
+                VotedAt = vote.VoteDate,
+                GiftName = gift.Name
+            };
+
         }
     }
 }

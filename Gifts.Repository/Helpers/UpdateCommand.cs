@@ -18,7 +18,7 @@ namespace Gifts.Repository.Helpers
             string idDbFieldName, int idDbFieldValue)
         {
             sqlCommand = sqlConnection.CreateCommand();
-            sqlCommand.CommandText = $"UPDATE {tableName}";
+            sqlCommand.CommandText = $"UPDATE {tableName} SET ";
 
             this.idDbFieldName = idDbFieldName;
             this.idDbFieldValue = idDbFieldValue;
@@ -40,23 +40,32 @@ namespace Gifts.Repository.Helpers
                 throw new Exception("No fields to update! You should pass at least one!");
             }
 
-            sqlCommand.CommandText +=
-@$"SET {string.Join(", ", setClauses)}
-WHERE {idDbFieldName} = @{idDbFieldName}";
+            sqlCommand.CommandText += string.Join(", ", setClauses);
+            sqlCommand.CommandText += $" WHERE {idDbFieldName} = @{idDbFieldName}";
 
             sqlCommand.Parameters.AddWithValue($"@{idDbFieldName}", idDbFieldValue);
 
             SqlTransaction transaction = sqlCommand.Connection.BeginTransaction();
+            sqlCommand.Transaction = transaction;
 
-            int rowsAffected = await sqlCommand.ExecuteNonQueryAsync();
-
-            if (rowsAffected != 1)
+            try
             {
-                throw new Exception($"Just one row should be updated! Command aborted, because {rowsAffected} could have been updated!");
-            }
+                int rowsAffected = await sqlCommand.ExecuteNonQueryAsync();
 
-            transaction.Commit();
-            return rowsAffected;
+                if (rowsAffected != 1)
+                {
+                    transaction.Rollback();
+                    throw new Exception($"Just one row should be updated! Command aborted, because {rowsAffected} could have been updated!");
+                }
+
+                transaction.Commit();
+                return rowsAffected;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
         public void Dispose()

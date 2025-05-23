@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Gifts.Services.DTOs.VotingSession
 {
-    public class GetVotingSessionsResponse : VotingSessionDto
+    public class GetVotingSessionsResponse : VotingSessionInfo
     {
         
     }

@@ -7,7 +7,7 @@ namespace Gifts.Services.DTOs.VotingSession
 {
     public class GetActiveVotingSessionsResponse
     {
-        public List<VotingSessionDto>? ActiveSessions { get; set; }
+        public List<VotingSessionInfo>? ActiveSessions { get; set; }
         public int TotalCount { get; set; }
     }
 }

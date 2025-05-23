@@ -33,6 +33,30 @@ namespace Gifts.Services
 {
     public class Program
     {
+        static async Task<LoginResponce> PerformLogin(IAuthenticationService authService)
+        {
+            Console.WriteLine("\nLogin:");
+            Console.Write("Username: ");
+            var username = Console.ReadLine();
+            Console.Write("Password: ");
+            var password = Console.ReadLine();
+
+            var loginResult = await authService.LoginAsync(new LoginRequest 
+            { 
+                Username = username, 
+                Password = password 
+            });
+
+            if (!loginResult.Success)
+            {
+                Console.WriteLine($"Login failed: {loginResult.Message}");
+                return null;
+            }
+
+            Console.WriteLine($"\nSuccessfully logged in as: {loginResult.FullName}");
+            return loginResult;
+        }
+
         static async Task Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()
@@ -72,26 +96,8 @@ namespace Gifts.Services
             {
                 Console.WriteLine("Successfully connected to database!");
 
-                // First user login
-                Console.WriteLine("\nLogin as first user:");
-                Console.Write("Username: ");
-                var username1 = Console.ReadLine();
-                Console.Write("Password: ");
-                var password1 = Console.ReadLine();
-
-                var loginResult1 = await authService.LoginAsync(new LoginRequest 
-                { 
-                    Username = username1, 
-                    Password = password1 
-                });
-
-                if (!loginResult1.Success)
-                {
-                    Console.WriteLine($"Login failed: {loginResult1.Message}");
-                    return;
-                }
-
-                Console.WriteLine($"\nSuccessfully logged in as: {loginResult1.FullName}");
+                var loginResult1 = await PerformLogin(authService);
+                if (loginResult1 == null) return;
 
                 while (true)
                 {
@@ -103,7 +109,8 @@ namespace Gifts.Services
                     Console.WriteLine("5. Vote in Session");
                     Console.WriteLine("6. View Session Votes");
                     Console.WriteLine("7. End Voting Session");
-                    Console.WriteLine("8. Exit");
+                    Console.WriteLine("8. Change User");
+                    Console.WriteLine("9. Exit");
                     Console.Write("\nSelect an option: ");
 
                     var choice = Console.ReadLine();
@@ -113,19 +120,29 @@ namespace Gifts.Services
                     {
                         case "1":
                             // List Employees
-                            var employees = await employeeService.GetAllEmployeesAsync();
-                            Console.WriteLine("Available employees:");
-                            foreach (var emp in employees)
+                            var employeesResponse = await employeeService.GetAllEmployeesAsync();
+                            if (employeesResponse?.Employees == null || employeesResponse.Employees.Count == 0)
                             {
-                                Console.WriteLine($"ID: {emp.EmployeeId}, Name: {emp.FullName}, Username: {emp.Username}");
+                                Console.WriteLine("No employees found.");
+                                break;
+                            }
+                            Console.WriteLine("Available employees:");
+                            foreach (var emp in employeesResponse.Employees)
+                            {
+                                Console.WriteLine($"ID: {emp.EmployeeId}, Name: {emp.FullName}, Days till birthday: {emp.DaysTillNextBirthday}");
                             }
                             break;
 
                         case "2":
                             // List Gifts
-                            var gifts = await giftService.GetAllGiftsAsync();
+                            var giftsResponse = await giftService.GetAllGiftsAsync();
+                            if (giftsResponse?.Gifts == null || giftsResponse.Gifts.Count == 0)
+                            {
+                                Console.WriteLine("No gifts found.");
+                                break;
+                            }
                             Console.WriteLine("Available gifts:");
-                            foreach (var gift in gifts)
+                            foreach (var gift in giftsResponse.Gifts)
                             {
                                 Console.WriteLine($"ID: {gift.GiftId}, Name: {gift.Name}, Price: {gift.Price}");
                             }
@@ -145,6 +162,11 @@ namespace Gifts.Services
                                     };
 
                                     var session = await votingSessionService.CreateVotingSessionAsync(createSessionRequest);
+                                    if (!session.Success)
+                                    {
+                                        Console.WriteLine($"Failed to create session: {session.Message}");
+                                        break;
+                                    }
                                     Console.WriteLine($"Created voting session with ID: {session.VotingSessionId} for {session.BirthdayPersonName}");
                                 }
                                 catch (Exception ex)
@@ -157,11 +179,14 @@ namespace Gifts.Services
                         case "4":
                             // View Active Sessions
                             var activeSessions = await votingSessionService.GetAllActiveVotingSessionsAsync();
-                            var filteredSessions = activeSessions.Where(s => s.BirthdayPersonId != loginResult1.UserId);
-                            
+                            if (activeSessions?.ActiveSessions == null || activeSessions.ActiveSessions.Count == 0)
+                            {
+                                Console.WriteLine("No active voting sessions found.");
+                                break;
+                            }
                             Console.WriteLine("Active voting sessions:");
                             var hasAnySessions = false;
-                            foreach (var session in filteredSessions)
+                            foreach (var session in activeSessions.ActiveSessions.Where(s => s.BirthdayPersonId != loginResult1.UserId))
                             {
                                 hasAnySessions = true;
                                 Console.WriteLine($"Session ID: {session.VotingSessionId}, Birthday Person: {session.BirthdayPersonName}, Created By: {session.CreatedByFullName}");
@@ -181,6 +206,11 @@ namespace Gifts.Services
                                 {
                                     // First check if this is the user's birthday session
                                     var session = await votingSessionService.GetVotingSessionByIdAsync(sessionId);
+                                    if (session == null)
+                                    {
+                                        Console.WriteLine("Session not found.");
+                                        break;
+                                    }
                                     if (session.BirthdayPersonId == loginResult1.UserId)
                                     {
                                         Console.WriteLine("You cannot vote in your own birthday session!");
@@ -198,6 +228,11 @@ namespace Gifts.Services
                                         };
 
                                         var vote = await voteService.CreateVoteAsync(voteRequest);
+                                        if (!vote.Success)
+                                        {
+                                            Console.WriteLine($"Failed to create vote: {vote.Message}");
+                                            break;
+                                        }
                                         Console.WriteLine($"Vote registered successfully! Voted for gift: {vote.GiftName}");
                                     }
                                 }
@@ -217,15 +252,25 @@ namespace Gifts.Services
                                 {
                                     // Check if this is the user's birthday session
                                     var voteSession = await votingSessionService.GetVotingSessionByIdAsync(voteSessionId);
+                                    if (voteSession == null)
+                                    {
+                                        Console.WriteLine("Session not found.");
+                                        break;
+                                    }
                                     if (voteSession.BirthdayPersonId == loginResult1.UserId)
                                     {
                                         Console.WriteLine("You cannot view votes for your own birthday session!");
                                         break;
                                     }
 
-                                    var votes = await voteService.GetVotesByVotingSessionIdAsync(voteSessionId);
+                                    var votesResponse = await voteService.GetVotesByVotingSessionIdAsync(voteSessionId);
+                                    if (votesResponse?.Votes == null || votesResponse.Votes.Count == 0)
+                                    {
+                                        Console.WriteLine("No votes found for this session.");
+                                        break;
+                                    }
                                     Console.WriteLine($"\nVotes in session {voteSessionId}:");
-                                    foreach (var vote in votes)
+                                    foreach (var vote in votesResponse.Votes)
                                     {
                                         Console.WriteLine($"Voter: {vote.VoterName}, Gift: {vote.GiftName}, Vote Date: {vote.VoteDate}");
                                     }
@@ -244,14 +289,20 @@ namespace Gifts.Services
                             {
                                 try
                                 {
-                                    var result = await votingSessionService.EndVotingSessionAsync(endSessionId, loginResult1.UserId.Value);
-                                    if (result)
+                                    var endSessionRequest = new EndVotingSessionRequest
+                                    {
+                                        VotingSessionId = endSessionId,
+                                        EndedById = loginResult1.UserId.Value
+                                    };
+                                    
+                                    var result = await votingSessionService.EndVotingSessionAsync(endSessionRequest);
+                                    if (result.Success)
                                     {
                                         Console.WriteLine("Voting session ended successfully!");
                                     }
                                     else
                                     {
-                                        Console.WriteLine("Failed to end voting session.");
+                                        Console.WriteLine($"Failed to end voting session: {result.Message}");
                                     }
                                 }
                                 catch (Exception ex)
@@ -262,6 +313,12 @@ namespace Gifts.Services
                             break;
 
                         case "8":
+                            // Change User
+                            loginResult1 = await PerformLogin(authService);
+                            if (loginResult1 == null) return;
+                            break;
+
+                        case "9":
                             Console.WriteLine("Goodbye!");
                             return;
 
