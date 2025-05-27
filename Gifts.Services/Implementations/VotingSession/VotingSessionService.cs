@@ -183,6 +183,23 @@ namespace Gifts.Services.Implementations.VotingSession
             return response;
         }
 
+        public async Task<GetActiveVotingSessionsResponse> GetCompletedSessionsAsync()
+        {
+            var filter = new VotingSessionFilter { IsActive = SqlBoolean.False };
+            var sessions = await _votingSessionRepository.RetrieveCollectionAsync(filter).ToListAsync();
+
+            var sessionsResponse = new GetActiveVotingSessionsResponse
+            {
+                ActiveSessions = new List<VotingSessionInfo>()
+            };
+
+            foreach (var session in sessions)
+            {
+                sessionsResponse.ActiveSessions.Add(await MapToVotingSessionInfoAsync(session));
+            }
+            return sessionsResponse;
+        }
+
         public async Task<GetVotingSessionsResponse> GetVotingSessionByIdAsync(int sessionId)
         {
             var session = await _votingSessionRepository.RetrieveAsync(sessionId);

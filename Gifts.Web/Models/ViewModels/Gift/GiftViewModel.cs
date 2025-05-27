@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Gifts.Web.Models.ViewModels.Gift
 {
@@ -11,5 +7,11 @@ namespace Gifts.Web.Models.ViewModels.Gift
         public string GiftName { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
+    }
+
+    public class GiftListViewModel
+    {
+        public List<GiftViewModel> Gifts { get; set; }
+        public int TotalCount { get; set; }
     }
 }

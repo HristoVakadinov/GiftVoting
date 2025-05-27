@@ -10,5 +10,6 @@ namespace Gifts.Services.DTOs.Employee
         public int EmployeeId { get; set; }
         public string FullName { get; set; }
         public int DaysTillNextBirthday { get; set; }
+        public DateTime BirthDate { get; internal set; }
     }
 }

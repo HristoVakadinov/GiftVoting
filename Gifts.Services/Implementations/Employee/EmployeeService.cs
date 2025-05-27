@@ -41,7 +41,8 @@ namespace Gifts.Services.Implementations.Employee
                 {
                     EmployeeId = e.EmployeeId,
                     FullName = e.FullName,
-                    DaysTillNextBirthday = daysToNextBirthday
+                    DaysTillNextBirthday = daysToNextBirthday,
+                    BirthDate = e.BirthDate
                 };
             }).ToList();
 

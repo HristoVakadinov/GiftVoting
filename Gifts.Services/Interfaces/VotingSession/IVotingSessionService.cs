@@ -10,6 +10,7 @@ namespace Gifts.Services.Interfaces.VotingSession
     {
         Task<GetVotingSessionsResponse> GetVotingSessionByIdAsync(int sessionId);
         Task<GetActiveVotingSessionsResponse> GetAllActiveVotingSessionsAsync();
+        Task<GetActiveVotingSessionsResponse> GetCompletedSessionsAsync();
         Task<CreateVotingSessionResponse> CreateVotingSessionAsync(CreateVotingSessionRequest request);
         Task<EndVotingSessionResponse> EndVotingSessionAsync(EndVotingSessionRequest request);
         Task<GetVotingSessionsResponse> GetActiveSessionForEmployeeAsync(int employeeId);

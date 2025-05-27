@@ -11,7 +11,7 @@ namespace Gifts.Services.Interfaces.Employee
         Task<GetEmployeeResponse> GetEmployeeByIdAsync(int employeeId);
         Task<GetAllEmployeesResponse> GetAllEmployeesAsync();
         // Task<EmployeeDto> CreateEmployeeAsync(EmployeeDto employee);
-         Task<UpdateEmployeeResponse> UpdateFullNameAsync(UpdateFullNameRequest request);
+        Task<UpdateEmployeeResponse> UpdateFullNameAsync(UpdateFullNameRequest request);
         Task<UpdateEmployeeResponse> UpdatePasswordAsync(UpdatePasswordRequest request);
         Task<GetAllEmployeesResponse> GetEmployeesWithUpcomingBirthdays(int daysAhead);
     }
