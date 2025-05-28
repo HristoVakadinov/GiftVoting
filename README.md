@@ -28,6 +28,9 @@ The **Birthday Gift Voting App** allows users within an organization to initiate
   - **Presentation Layer**: Razor Views / Blazor (if applicable)
   - **Business Logic Layer**: Services & Managers
   - **Data Access Layer**: Repository Pattern
+- 🎨 **Frontend**
+  - Bootstrap 5 (for responsive UI design)
+  - LibMan (Library Manager for client-side library management)
 - 🛠️ Dependency Injection, Authentication (basic), and simple UI design
 
 ## 🚀 Getting Started
@@ -36,8 +39,14 @@ To run the project locally:
 
 1. Clone the repository
 2. Set up the .NET SDK (>= 6.0)
-3. Configure the database (with seed data for employees & gifts)
-4. Run the application with `dotnet run`
-5. Open in your browser at `https://localhost:5001`
-
-
+3. Install LibMan CLI tool globally:
+   ```bash
+   dotnet tool install -g Microsoft.Web.LibraryManager.Cli
+   ```
+4. Restore client-side libraries (Bootstrap, etc.):
+   ```bash
+   libman restore
+   ```
+5. Configure the database (with seed data for employees & gifts)
+6. Run the application with `dotnet run`
+7. Open in your browser at `https://localhost:5001`

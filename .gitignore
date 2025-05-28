@@ -10,3 +10,6 @@
 
 #appsettings.json
 **/appsettings.json
+
+#bootstrap
+Gifts.Web/wwwroot/lib/
