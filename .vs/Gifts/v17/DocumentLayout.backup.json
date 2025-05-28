@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\Intern\\source\\repos\\Gifts\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{CFDD26A9-B5E0-40D3-88F9-980A36837B02}|Gifts.Web\\Gifts.Web.csproj|c:\\users\\intern\\source\\repos\\gifts\\gifts.web\\gifts.web.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{CFDD26A9-B5E0-40D3-88F9-980A36837B02}|Gifts.Web\\Gifts.Web.csproj|solutionrelative:gifts.web\\gifts.web.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{78E77824-1E83-486C-B784-0260C4BF5DD4}|Gifts.Repository\\Gifts.Repository.csproj|c:\\users\\intern\\source\\repos\\gifts\\gifts.repository\\implementations\\gift\\giftrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{78E77824-1E83-486C-B784-0260C4BF5DD4}|Gifts.Repository\\Gifts.Repository.csproj|solutionrelative:gifts.repository\\implementations\\gift\\giftrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -18,15 +22,28 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Gifts.Web",
+              "DocumentMoniker": "C:\\Users\\Intern\\source\\repos\\Gifts\\Gifts.Web\\Gifts.Web.csproj",
+              "RelativeDocumentMoniker": "Gifts.Web\\Gifts.Web.csproj",
+              "ToolTip": "C:\\Users\\Intern\\source\\repos\\Gifts\\Gifts.Web\\Gifts.Web.csproj",
+              "RelativeToolTip": "Gifts.Web\\Gifts.Web.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-05-27T19:21:23.179Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "VotingSessionRepository.cs",
               "DocumentMoniker": "C:\\Users\\Intern\\source\\repos\\Gifts\\Gifts.Repository\\Implementations\\VotingSession\\VotingSessionRepository.cs",
               "RelativeDocumentMoniker": "Gifts.Repository\\Implementations\\VotingSession\\VotingSessionRepository.cs",
@@ -38,7 +55,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "GiftRepository.cs",
               "DocumentMoniker": "C:\\Users\\Intern\\source\\repos\\Gifts\\Gifts.Repository\\Implementations\\Gift\\GiftRepository.cs",
               "RelativeDocumentMoniker": "Gifts.Repository\\Implementations\\Gift\\GiftRepository.cs",

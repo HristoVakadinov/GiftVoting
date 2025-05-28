@@ -55,18 +55,21 @@ namespace Gifts.Services.Implementations.Employee
 
         public async Task<GetEmployeeResponse> GetEmployeeByIdAsync(int employeeId)
         {
-            var employee = await _employeeRepository.RetrieveAsync(employeeId);
-            if (employee == null)
+            try
             {
-                throw new Exception("Employee not found");
+                var employee = await _employeeRepository.RetrieveAsync(employeeId);
+                return new GetEmployeeResponse
+                {
+                    EmployeeId = employee.EmployeeId,
+                    FullName = employee.FullName,
+                    BirthDate = employee.BirthDate,
+                    Username = employee.Username
+                };
             }
-            return new GetEmployeeResponse
+            catch (Exception)
             {
-                EmployeeId = employee.EmployeeId,
-                FullName = employee.FullName,
-                BirthDate = employee.BirthDate,
-                Username = employee.Username
-            };
+                return null;
+            }
         }
 
         public async Task<GetAllEmployeesResponse> GetEmployeesWithUpcomingBirthdays(int daysAhead)

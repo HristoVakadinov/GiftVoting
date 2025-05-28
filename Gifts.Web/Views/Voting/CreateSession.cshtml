@@ -1,0 +1,84 @@
+﻿@model CreateVotingSessionViewModel
+@{
+    ViewData["Title"] = "Create Voting Session";
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Create Voting Session</h2>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            @if (ViewData.ModelState.ContainsKey("") && ViewData.ModelState[""].Errors.Any())
+                            {
+                                @foreach (var error in ViewData.ModelState[""].Errors)
+                                {
+                                    <p class="mb-0">@error.ErrorMessage</p>
+                                }
+                            }
+                            else
+                            {
+                                @foreach (var modelState in ViewData.ModelState.Values)
+                                {
+                                    @foreach (var error in modelState.Errors)
+                                    {
+                                        <p class="mb-0">@error.ErrorMessage</p>
+                                    }
+                                }
+                            }
+                        </div>
+                    }
+
+                    <form asp-action="CreateSession" method="post">
+                        <input type="hidden" asp-for="BirthdayPersonId" />
+                        <input type="hidden" asp-for="BirthdayPersonName" />
+
+                        <div class="row mb-4">
+                            <div class="col">
+                                <h5>Confirm Voting Session Details</h5>
+                                <hr />
+                                <dl class="row">
+                                    <dt class="col-sm-3">Birthday Person:</dt>
+                                    <dd class="col-sm-9">@Model.BirthdayPersonName</dd>
+                                </dl>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    Creating a voting session will allow others to vote for a birthday gift.
+                                    Make sure that:
+                                    <ul class="mb-0 mt-2">
+                                        <li>There is no active session for this person</li>
+                                        <li>There hasn't been a session for this person this year</li>
+                                        <li>You are not creating a session for yourself</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col text-end">
+                                <a asp-controller="Employee"
+                                asp-action="Index"
+                                class="btn btn-secondary me-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Create Session</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

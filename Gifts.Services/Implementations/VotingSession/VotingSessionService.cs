@@ -24,20 +24,39 @@ namespace Gifts.Services.Implementations.VotingSession
 
         private async Task<VotingSessionInfo> MapToVotingSessionInfoAsync(Models.VotingSession votingSession)
         {
-            var birthdayPerson = await _employeeRepository.RetrieveAsync(votingSession.BirthdayPersonId);
-            var createdBy = await _employeeRepository.RetrieveAsync(votingSession.CreatedById);
-            return new VotingSessionInfo
+            try
             {
-                VotingSessionId = votingSession.VotingSessionId,
-                BirthdayPersonId = votingSession.BirthdayPersonId,
-                BirthdayPersonName = birthdayPerson.FullName,
-                CreatedById = votingSession.CreatedById,
-                CreatedByFullName = createdBy.FullName,
-                StartDate = votingSession.StartDate,
-                EndDate = votingSession.EndDate,
-                IsActive = votingSession.IsActive,
-                BirthYear = votingSession.BirthYear
-            };
+                var birthdayPerson = await _employeeRepository.RetrieveAsync(votingSession.BirthdayPersonId);
+                var createdBy = await _employeeRepository.RetrieveAsync(votingSession.CreatedById);
+                return new VotingSessionInfo
+                {
+                    VotingSessionId = votingSession.VotingSessionId,
+                    BirthdayPersonId = votingSession.BirthdayPersonId,
+                    BirthdayPersonName = birthdayPerson.FullName,
+                    CreatedById = votingSession.CreatedById,
+                    CreatedByFullName = createdBy.FullName,
+                    StartDate = votingSession.StartDate,
+                    EndDate = votingSession.EndDate,
+                    IsActive = votingSession.IsActive,
+                    BirthYear = votingSession.BirthYear
+                };
+            }
+            catch (Exception)
+            {
+                // Return with default names if employees not found
+                return new VotingSessionInfo
+                {
+                    VotingSessionId = votingSession.VotingSessionId,
+                    BirthdayPersonId = votingSession.BirthdayPersonId,
+                    BirthdayPersonName = "Unknown Employee",
+                    CreatedById = votingSession.CreatedById,
+                    CreatedByFullName = "Unknown Employee",
+                    StartDate = votingSession.StartDate,
+                    EndDate = votingSession.EndDate,
+                    IsActive = votingSession.IsActive,
+                    BirthYear = votingSession.BirthYear
+                };
+            }
         }
 
         public async Task<CreateVotingSessionResponse> CreateVotingSessionAsync(CreateVotingSessionRequest request)
@@ -164,7 +183,19 @@ namespace Gifts.Services.Implementations.VotingSession
             var session = sessions.FirstOrDefault();
             if (session == null) return null;
 
-            return (GetVotingSessionsResponse)await MapToVotingSessionInfoAsync(session);
+            var sessionInfo = await MapToVotingSessionInfoAsync(session);
+            return new GetVotingSessionsResponse
+            {
+                VotingSessionId = sessionInfo.VotingSessionId,
+                BirthdayPersonId = sessionInfo.BirthdayPersonId,
+                BirthdayPersonName = sessionInfo.BirthdayPersonName,
+                CreatedById = sessionInfo.CreatedById,
+                CreatedByFullName = sessionInfo.CreatedByFullName,
+                StartDate = sessionInfo.StartDate,
+                EndDate = sessionInfo.EndDate,
+                IsActive = sessionInfo.IsActive,
+                BirthYear = sessionInfo.BirthYear
+            };
         }
 
         public async Task<GetActiveVotingSessionsResponse> GetAllActiveVotingSessionsAsync()
@@ -202,22 +233,27 @@ namespace Gifts.Services.Implementations.VotingSession
 
         public async Task<GetVotingSessionsResponse> GetVotingSessionByIdAsync(int sessionId)
         {
-            var session = await _votingSessionRepository.RetrieveAsync(sessionId);
-            if (session == null) return null;
-            
-            var sessionInfo = await MapToVotingSessionInfoAsync(session);
-            return new GetVotingSessionsResponse
+            try
             {
-                VotingSessionId = sessionInfo.VotingSessionId,
-                BirthdayPersonId = sessionInfo.BirthdayPersonId,
-                BirthdayPersonName = sessionInfo.BirthdayPersonName,
-                CreatedById = sessionInfo.CreatedById,
-                CreatedByFullName = sessionInfo.CreatedByFullName,
-                StartDate = sessionInfo.StartDate,
-                EndDate = sessionInfo.EndDate,
-                IsActive = sessionInfo.IsActive,
-                BirthYear = sessionInfo.BirthYear
-            };
+                var session = await _votingSessionRepository.RetrieveAsync(sessionId);
+                var sessionInfo = await MapToVotingSessionInfoAsync(session);
+                return new GetVotingSessionsResponse
+                {
+                    VotingSessionId = sessionInfo.VotingSessionId,
+                    BirthdayPersonId = sessionInfo.BirthdayPersonId,
+                    BirthdayPersonName = sessionInfo.BirthdayPersonName,
+                    CreatedById = sessionInfo.CreatedById,
+                    CreatedByFullName = sessionInfo.CreatedByFullName,
+                    StartDate = sessionInfo.StartDate,
+                    EndDate = sessionInfo.EndDate,
+                    IsActive = sessionInfo.IsActive,
+                    BirthYear = sessionInfo.BirthYear
+                };
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

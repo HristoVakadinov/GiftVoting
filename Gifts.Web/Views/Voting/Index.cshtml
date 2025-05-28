@@ -1,0 +1,96 @@
+﻿@model VotingSessionListViewModel
+@{
+    ViewData["Title"] = "Active Voting Sessions";
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Active Voting Sessions</h2>
+            <hr />
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(TempData["SuccessMessage"] as string))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(TempData["ErrorMessage"] as string))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.ActiveVotingSessions.Any())
+    {
+        <div class="row">
+            <div class="col">
+                @foreach (var session in Model.ActiveVotingSessions)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <h5 class="mb-0">@session.BirthdayPersonName</h5>
+                                    <small class="text-muted">Birthday: @session.BirthDate.ToString("MMMM dd")</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <p class="mb-0">Started by: @session.CreatedByName</p>
+                                    <small class="text-muted">@session.CreatedDate.ToString("MMM dd, yyyy")</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <p class="mb-0">Total votes:</p>
+                                    <span class="badge bg-secondary">@session.VotesCount</span>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    @if (session.IsCreator)
+                                    {
+                                        <button class="btn btn-danger me-2"
+                                                onclick="confirmEndSession(@session.VotingSessionId)">
+                                            End Session
+                                        </button>
+                                    }
+                                    @if (!session.HasUserVoted)
+                                    {
+                                        <a href="@Url.Action("Vote", new { sessionId = session.VotingSessionId })"
+                                        class="btn btn-primary">
+                                            Vote Now
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-secondary" disabled>
+                                            Already Voted
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            No active voting sessions at the moment.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function confirmEndSession(sessionId) {
+            if (confirm('Are you sure you want to end this voting session? This action cannot be undone.')) {
+                window.location.href = '@Url.Action("EndSession")?sessionId=' + sessionId;
+            }
+        }
+    </script>
+}

@@ -37,12 +37,15 @@ namespace Gifts.Services.Implementations.Gift
 
         public async Task<GetGiftResponse> GetGiftByIdAsync(int giftId)
         {
-            var gift = await _giftRepository.RetrieveAsync(giftId);
-            if (gift == null)
+            try
             {
-                throw new Exception("Gift not found");
+                var gift = await _giftRepository.RetrieveAsync(giftId);
+                return (GetGiftResponse)MapToGiftInfo(gift);
             }
-            return (GetGiftResponse)MapToGiftInfo(gift);
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

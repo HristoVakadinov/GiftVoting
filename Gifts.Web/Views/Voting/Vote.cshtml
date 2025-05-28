@@ -1,0 +1,53 @@
+﻿@model VoteViewModel
+@{
+    ViewData["Title"] = "Vote for Gift";
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Vote for @Model.BirthdayPersonName's Gift</h2>
+            <hr />
+        </div>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            @foreach (var error in ViewData.ModelState[""].Errors)
+            {
+                <p class="mb-0">@error.ErrorMessage</p>
+            }
+        </div>
+    }
+
+    <div class="row">
+        @foreach (var gift in Model.AvailableGifts)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@gift.GiftName</h5>
+                        <p class="card-text">@gift.Description</p>
+                        <p class="card-text">
+                            <span class="badge bg-primary">@gift.Price.ToString("C")</span>
+                        </p>
+                        <form asp-action="Vote" method="post" class="text-end">
+                            <input type="hidden" name="sessionId" value="@Model.VotingSessionId" />
+                            <input type="hidden" name="giftId" value="@gift.GiftId" />
+                            <button type="submit" class="btn btn-primary">
+                                Select this Gift
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row mt-4">
+        <div class="col text-end">
+            <a asp-action="Index" class="btn btn-secondary">Back to Sessions</a>
+        </div>
+    </div>
+</div>

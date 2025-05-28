@@ -1,0 +1,116 @@
+@model EmployeeListViewModel
+@{
+    ViewData["Title"] = "Employee";
+}
+
+<div class="container py-4">
+    @if (!string.IsNullOrEmpty(TempData["SuccessMessage"] as string))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(TempData["ErrorMessage"] as string))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">All Employees</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Birth Date</th>
+                                    <th>Days to Birthday</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var employee in Model.Employees)
+                                {
+                                    <tr>
+                                        <td>@employee.FullName</td>
+                                        <td>@employee.BirthDate.ToString("MMM dd yyyy")</td>
+                                        <td>
+                                            @if (employee.DaysToNextBirthday == 0)
+                                            {
+                                                <span class="badge bg-success">Today!</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@employee.DaysToNextBirthday days</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary"
+                                                    onclick="location.href='@Url.Action("CreateSession", "Voting", new { birthdayPersonId = employee.EmployeeId })'">
+                                                Start Voting
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Upcoming Birthdays</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.EmployeesWithUpcomingBirthdays.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var employee in Model.EmployeesWithUpcomingBirthdays.OrderBy(e => e.DaysToNextBirthday))
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">@employee.FullName</h6>
+                                            <p class="mb-1">
+                                                @if (employee.DaysToNextBirthday == 0)
+                                                {
+                                                    <span class="text-success">Today!</span>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">In @employee.DaysToNextBirthday days</small>
+                                                }
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-primary"
+                                                    onclick="location.href='@Url.Action("CreateSession", "Voting", new { birthdayPersonId = employee.EmployeeId })'">
+                                                Start Voting
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No upcoming birthdays in the next 30 days.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

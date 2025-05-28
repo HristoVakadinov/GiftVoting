@@ -1,0 +1,49 @@
+@model GiftListViewModel
+@{
+    ViewData["Title"] = "Gift";
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Available Gifts</h2>
+            <hr />
+        </div>
+    </div>
+
+    @if (Model.Gifts.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var gift in Model.Gifts)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">@gift.GiftName</h5>
+                            <p class="card-text">@gift.Description</p>
+                            <div class="d-flex justify-content-end">
+                                <span class="badge bg-primary rounded-pill">
+                                    @gift.Price.ToString("C")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="row mt-4">
+            <div class="col">
+                <p class="text-muted">
+                    Total available gifts: @Model.TotalCount
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            No gifts available at the moment.
+        </div>
+    }
+</div>
