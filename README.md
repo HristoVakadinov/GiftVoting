@@ -22,11 +22,10 @@ The **Birthday Gift Voting App** allows users within an organization to initiate
 
 - 💻 **.NET Stack**
   - ASP.NET Core MVC (preferred architectural pattern)
-  - Entity Framework Core
   - Microsoft SQL Server
 - 🎯 **3-Tier Architecture**
-  - **Presentation Layer**: Razor Views / Blazor (if applicable)
-  - **Business Logic Layer**: Services & Managers
+  - **Presentation Layer**: Razor Views
+  - **Business Logic Layer**: Services 
   - **Data Access Layer**: Repository Pattern
 - 🎨 **Frontend**
   - Bootstrap 5 (for responsive UI design)
